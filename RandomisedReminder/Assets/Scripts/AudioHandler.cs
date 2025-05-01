@@ -1,6 +1,8 @@
 using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 #if UNITY_EDITOR
 using UnityEditor;
 
@@ -41,11 +43,13 @@ class AudioHandlerEditor : Editor
 public class AudioHandler : MonoBehaviour
 {
     [SerializeField] AudioSource _audioSource;
+    [Range(0,60)]
     [SerializeField] int _duration;
     [Header("Clips")]
     [SerializeField] AudioClip _start;
     [SerializeField] List<AudioClip> _reminders;
-
+    [SerializeField] TextMeshProUGUI _displayTime;
+    
     int _counter = 0;
     public float RemainingTime { get => _remainingTime;  }
     float _remainingTime;
@@ -62,10 +66,12 @@ public class AudioHandler : MonoBehaviour
         if (_remainingTime >0)
         {
             _remainingTime -= Time.deltaTime;
+            _displayTime.text = FormattedTime();
         }
         else
         {
             _isCountingDown = false;
+            Application.Quit();
         }
     }
 
@@ -94,6 +100,6 @@ public class AudioHandler : MonoBehaviour
         int minutes = Mathf.FloorToInt(_remainingTime / 60);
         int seconds = Mathf.FloorToInt((_remainingTime % 60));
 
-        return $"{minutes} : {seconds}";
+        return minutes.ToString("00") + " : " + seconds.ToString("00");
     }
 }
