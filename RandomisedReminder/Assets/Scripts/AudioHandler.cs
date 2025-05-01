@@ -30,6 +30,7 @@ class AudioHandlerEditor : Editor
         {
             audioHandler.ChangeClip();
         }
+        EditorGUILayout.TextField(audioHandler.FormattedTime());
         //base.OnInspectorGUI();
         DrawDefaultInspector();
     }
@@ -40,11 +41,33 @@ class AudioHandlerEditor : Editor
 public class AudioHandler : MonoBehaviour
 {
     [SerializeField] AudioSource _audioSource;
+    [SerializeField] int _duration;
     [Header("Clips")]
     [SerializeField] AudioClip _start;
     [SerializeField] List<AudioClip> _reminders;
 
     int _counter = 0;
+    public float RemainingTime { get => _remainingTime;  }
+    float _remainingTime;
+    bool _isCountingDown;
+
+    public void Start()
+    {
+        _remainingTime = _duration * 60f;
+        _isCountingDown = true;
+    }
+
+    public void Update()
+    {
+        if (_remainingTime >0)
+        {
+            _remainingTime -= Time.deltaTime;
+        }
+        else
+        {
+            _isCountingDown = false;
+        }
+    }
 
     public void PlayClip()
     {
@@ -64,5 +87,13 @@ public class AudioHandler : MonoBehaviour
     {
         _counter++;
         _audioSource.clip = _reminders[_counter % _reminders.Count];
+    }
+
+    public string FormattedTime()
+    {
+        int minutes = Mathf.FloorToInt(_remainingTime / 60);
+        int seconds = Mathf.FloorToInt((_remainingTime % 60));
+
+        return $"{minutes} : {seconds}";
     }
 }
