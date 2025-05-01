@@ -32,6 +32,10 @@ class AudioHandlerEditor : Editor
         {
             audioHandler.ChangeClip();
         }
+        if (GUILayout.Button("BeginCountdown"))
+        {
+            audioHandler.BeginCountdown();
+        }
         EditorGUILayout.TextField(audioHandler.FormattedTime());
         //base.OnInspectorGUI();
         DrawDefaultInspector();
@@ -44,7 +48,7 @@ public class AudioHandler : MonoBehaviour
 {
     [SerializeField] AudioSource _audioSource;
     [Range(0,60)]
-    [SerializeField] int _duration;
+    [SerializeField] float _duration; //float temporarily to allow short durations but will be int
     [Header("Clips")]
     [SerializeField] AudioClip _start;
     [SerializeField] List<AudioClip> _reminders;
@@ -53,26 +57,43 @@ public class AudioHandler : MonoBehaviour
     int _counter = 0;
     public float RemainingTime { get => _remainingTime;  }
     float _remainingTime;
-    bool _isCountingDown;
+    bool _isCountingDown = false;
+
+    float MINS_TO_SECS = 60f;
 
     public void Start()
     {
-        _remainingTime = _duration * 60f;
-        _isCountingDown = true;
+        _remainingTime = _duration * MINS_TO_SECS;
     }
 
     public void Update()
     {
-        if (_remainingTime >0)
+        if (_isCountingDown == false) return;
+        if (_remainingTime > 0f)
         {
             _remainingTime -= Time.deltaTime;
             _displayTime.text = FormattedTime();
+            // dirty hack for now
+            // before _remainingTime = 0f in the else block it displays -01:-01 
+            if (_remainingTime < 0.1)
+            {
+                _remainingTime = 0f;
+            }
         }
         else
         {
+            Debug.Log(FormattedTime());
+            _remainingTime = 0f;
+            Debug.Log(FormattedTime());
             _isCountingDown = false;
-            Application.Quit();
         }
+        
+        
+    }
+
+    public void BeginCountdown()
+    {
+        _isCountingDown = true;
     }
 
     public void PlayClip()
