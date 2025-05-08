@@ -32,6 +32,10 @@ class AudioHandlerEditor : Editor
         {
             audioHandler.ChangeClip();
         }
+        if (GUILayout.Button("Initialise"))
+        {
+            audioHandler.Initialise();
+        }
         if (GUILayout.Button("BeginCountdown"))
         {
             audioHandler.BeginCountdown();
@@ -60,6 +64,9 @@ public class AudioHandler : MonoBehaviour
     bool _isCountingDown = false;
 
     float MINS_TO_SECS = 60f;
+    // this will vary later
+    private int _clipCount = 4;
+    private float _timeToNextClip;
 
     public void Start()
     {
@@ -87,8 +94,21 @@ public class AudioHandler : MonoBehaviour
             Debug.Log(FormattedTime());
             _isCountingDown = false;
         }
+
+
+        _timeToNextClip -= Time.deltaTime;
+        if (_timeToNextClip < 0)
+        {
+            Debug.Log("Reset now");
+            Initialise();
+        }
         
         
+    }
+
+    public void Initialise()
+    {
+        _timeToNextClip = _duration * MINS_TO_SECS / _clipCount;
     }
 
     public void BeginCountdown()
