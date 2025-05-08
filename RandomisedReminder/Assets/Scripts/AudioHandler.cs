@@ -40,7 +40,7 @@ class AudioHandlerEditor : Editor
         {
             audioHandler.BeginCountdown();
         }
-        EditorGUILayout.TextField(audioHandler.FormattedTime());
+        EditorGUILayout.TextField(audioHandler.FormattedTime(audioHandler.RemainingTime));
         //base.OnInspectorGUI();
         DrawDefaultInspector();
     }
@@ -92,7 +92,7 @@ public class AudioHandler : MonoBehaviour
         if (_remainingTime > 0f)
         {
             _remainingTime -= Time.deltaTime;
-            _displayTime.text = FormattedTime();
+            _displayTime.text = FormattedTime(_remainingTime);
             // dirty hack for now
             // before _remainingTime = 0f in the else block it displays -01:-01 
             if (_remainingTime < 0.1)
@@ -133,7 +133,27 @@ public class AudioHandler : MonoBehaviour
 
     public void Initialise()
     {
-        _timeToNextClip = _duration * MINS_TO_SECS / _clipCount;
+        _remainingTime = _duration * MINS_TO_SECS;
+
+        float baseInterval = 0f;
+        switch(_density)
+        {
+
+            case Density.SPARSE:
+                baseInterval = 360f;
+                break;
+            case Density.MEH:
+                baseInterval = 240f;
+                break;
+            case Density.FREQUENT:
+                baseInterval = 120f;
+                break;
+        }
+        if (baseInterval == 0f)
+            throw new ArgumentOutOfRangeException("interval between clips is 0 seconds");
+
+        _timeToNextClip = baseInterval;
+        Debug.Log($"Time to next clip: {FormattedTime(baseInterval)}");
     }
 
     public void BeginCountdown()
@@ -171,10 +191,10 @@ public class AudioHandler : MonoBehaviour
     }
     #endregion
 
-    public string FormattedTime()
+    public string FormattedTime(float time)
     {
-        int minutes = Mathf.FloorToInt(_remainingTime / 60);
-        int seconds = Mathf.FloorToInt((_remainingTime % 60));
+        int minutes = Mathf.FloorToInt(time / 60);
+        int seconds = Mathf.FloorToInt((time % 60));
 
         return minutes.ToString("00") + " : " + seconds.ToString("00");
     }
