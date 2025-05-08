@@ -825,14 +825,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec21cadbcb2b8884e9475cfd30926ba6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _audioSource: {fileID: 1775858317}
-  _duration: 0.5
+  _duration: 0.1
   _density: 1
-  _start: {fileID: 8300000, guid: fd9b145508ddc564c99fd503fa26742a, type: 3}
-  _reminders:
+  _startClip: {fileID: 8300000, guid: fd9b145508ddc564c99fd503fa26742a, type: 3}
+  _reminderClips:
   - {fileID: 8300000, guid: c57ce58db27bd2b49b546b171c37818b, type: 3}
   - {fileID: 8300000, guid: 485888e0c35cf3744a5a4396893cace6, type: 3}
   - {fileID: 8300000, guid: fefd3e54161e5c64aa3e04cc43d3ef84, type: 3}
+  _audioSource: {fileID: 1775858317}
   _displayTime: {fileID: 1716619836}
 --- !u!114 &1416909816
 MonoBehaviour:

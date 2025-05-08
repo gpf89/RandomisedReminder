@@ -57,24 +57,29 @@ public class AudioHandler : MonoBehaviour
         FREQUENT
     }
 
-    [SerializeField] AudioSource _audioSource;
+    [Header("User Controlls")]
     [Range(0,60)]
-    [SerializeField] float _duration; //float temporarily to allow short durations but will be int
-    [SerializeField] Density _density;
+    [SerializeField] private float _duration; //float temporarily to allow short durations but will be int
+    [SerializeField] private Density _density;
     [Header("Clips")]
-    [SerializeField] AudioClip _start;
-    [SerializeField] List<AudioClip> _reminders;
-    [SerializeField] TextMeshProUGUI _displayTime;
+    [SerializeField] private AudioClip _startClip;
+    [SerializeField] private List<AudioClip> _reminderClips;
+    [Header("Config")]
+    [SerializeField] private AudioSource _audioSource;
+    [SerializeField] private TextMeshProUGUI _displayTime;
     
-    int _counter = 0;
     public float RemainingTime { get => _remainingTime;  }
-    float _remainingTime;
-    bool _isCountingDown = false;
+    private float _remainingTime;
+    private float _timeToNextClip;
+    private bool _isCountingDown = false;
 
-    float MINS_TO_SECS = 60f;
+    private const float MINS_TO_SECS = 60f;
+
     // this will vary later
     private int _clipCount = 4;
-    private float _timeToNextClip;
+
+    //For Debug purposes only
+    private int _clipCounter = 0;
 
     public void Start()
     {
@@ -97,9 +102,6 @@ public class AudioHandler : MonoBehaviour
         }
         else
         {
-            Debug.Log(FormattedTime());
-            _remainingTime = 0f;
-            Debug.Log(FormattedTime());
             _isCountingDown = false;
         }
 
@@ -108,30 +110,11 @@ public class AudioHandler : MonoBehaviour
         if (_timeToNextClip < 0)
         {
             PlayNextClip();
+            Initialise();
         }
-        
-        
     }
 
-    public void Initialise()
-    {
-        _timeToNextClip = _duration * MINS_TO_SECS / _clipCount;
-    }
-
-    public void BeginCountdown()
-    {
-        _isCountingDown = true;
-    }
-
-    public void PlayNextClip()
-    {
-        var clipIndex = UnityEngine.Random.Range(0,_reminders.Count);
-        _audioSource.clip = _reminders[clipIndex];
-        _audioSource.Play();
-        Debug.Log($"Reset now, playing {_audioSource.clip.name}");
-        Initialise();
-    }
-
+    #region UIControlls
     public void SetDensityToSparse()
     {
         _density = Density.SPARSE;
@@ -146,7 +129,27 @@ public class AudioHandler : MonoBehaviour
     {
         _density = Density.FREQUENT;
     }
+    #endregion
 
+    public void Initialise()
+    {
+        _timeToNextClip = _duration * MINS_TO_SECS / _clipCount;
+    }
+
+    public void BeginCountdown()
+    {
+        _isCountingDown = true;
+    }
+
+    private void PlayNextClip()
+    {
+        var clipIndex = UnityEngine.Random.Range(0,_reminderClips.Count);
+        _audioSource.clip = _reminderClips[clipIndex];
+        _audioSource.Play();
+        Debug.Log($"Reset now, playing {_audioSource.clip.name}");
+    }
+
+    #region DebugButtons
     public void PlayClip()
     {
         _audioSource.Play();
@@ -163,9 +166,10 @@ public class AudioHandler : MonoBehaviour
 
     public void ChangeClip()
     {
-        _counter++;
-        _audioSource.clip = _reminders[_counter % _reminders.Count];
+        _clipCounter++;
+        _audioSource.clip = _reminderClips[_clipCounter % _reminderClips.Count];
     }
+    #endregion
 
     public string FormattedTime()
     {
