@@ -59,7 +59,7 @@ public class AudioHandler : MonoBehaviour
 
     [Header("User Controlls")]
     [Range(0,60)]
-    [SerializeField] private float _duration; //float temporarily to allow short durations but will be int
+    [SerializeField] private int _duration = 15;
     [SerializeField] private Density _density;
     [Header("Clips")]
     [SerializeField] private AudioClip _startClip;
