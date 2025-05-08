@@ -825,7 +825,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec21cadbcb2b8884e9475cfd30926ba6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _duration: 0.1
+  _duration: 15
   _density: 1
   _startClip: {fileID: 8300000, guid: fd9b145508ddc564c99fd503fa26742a, type: 3}
   _reminderClips:
