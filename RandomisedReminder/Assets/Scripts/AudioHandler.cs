@@ -74,6 +74,7 @@ public class AudioHandler : MonoBehaviour
     private bool _isCountingDown = false;
 
     private const float MINS_TO_SECS = 60f;
+    private const float FRACTIONAL_VARIATION = 0.2f;
 
     // this will vary later
     private int _clipCount = 4;
@@ -151,12 +152,14 @@ public class AudioHandler : MonoBehaviour
         if (baseInterval == 0f)
             throw new ArgumentOutOfRangeException("interval between clips is 0 seconds");
 
-        _timeToNextClip = baseInterval;
-        Debug.Log($"Clip timer reset, time to next clip: {FormattedTime(baseInterval)}");
+        float intervalDeviation = UnityEngine.Random.Range(-0.5f * baseInterval * FRACTIONAL_VARIATION, 0.5f * baseInterval * FRACTIONAL_VARIATION);
+        _timeToNextClip = baseInterval + intervalDeviation;
+        Debug.Log($"Clip timer reset, time to next clip: {FormattedTime(_timeToNextClip)}, intervalDeviation: {intervalDeviation}");
     }
 
     public void BeginCountdown()
     {
+        Initialise();
         _isCountingDown = true;
         _audioSource.clip = _startClip;
         _audioSource.Play();
