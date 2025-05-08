@@ -138,7 +138,6 @@ public class AudioHandler : MonoBehaviour
         float baseInterval = 0f;
         switch(_density)
         {
-
             case Density.SPARSE:
                 baseInterval = 360f;
                 break;
@@ -153,12 +152,14 @@ public class AudioHandler : MonoBehaviour
             throw new ArgumentOutOfRangeException("interval between clips is 0 seconds");
 
         _timeToNextClip = baseInterval;
-        Debug.Log($"Time to next clip: {FormattedTime(baseInterval)}");
+        Debug.Log($"Clip timer reset, time to next clip: {FormattedTime(baseInterval)}");
     }
 
     public void BeginCountdown()
     {
         _isCountingDown = true;
+        _audioSource.clip = _startClip;
+        _audioSource.Play();
     }
 
     private void PlayNextClip()
@@ -166,7 +167,7 @@ public class AudioHandler : MonoBehaviour
         var clipIndex = UnityEngine.Random.Range(0,_reminderClips.Count);
         _audioSource.clip = _reminderClips[clipIndex];
         _audioSource.Play();
-        Debug.Log($"Reset now, playing {_audioSource.clip.name}");
+        Debug.Log($"Playing clip {_audioSource.clip.name}");
     }
 
     #region DebugButtons
