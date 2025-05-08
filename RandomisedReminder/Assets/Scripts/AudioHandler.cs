@@ -50,9 +50,17 @@ class AudioHandlerEditor : Editor
 
 public class AudioHandler : MonoBehaviour
 {
+    enum Density
+    {
+        SPARSE,
+        MEH,
+        FREQUENT
+    }
+
     [SerializeField] AudioSource _audioSource;
     [Range(0,60)]
     [SerializeField] float _duration; //float temporarily to allow short durations but will be int
+    [SerializeField] Density _density;
     [Header("Clips")]
     [SerializeField] AudioClip _start;
     [SerializeField] List<AudioClip> _reminders;
@@ -122,6 +130,21 @@ public class AudioHandler : MonoBehaviour
         _audioSource.Play();
         Debug.Log($"Reset now, playing {_audioSource.clip.name}");
         Initialise();
+    }
+
+    public void SetDensityToSparse()
+    {
+        _density = Density.SPARSE;
+    }
+
+    public void SetDensityToMeh()
+    {
+        _density = Density.MEH;
+    }
+
+    public void SetDensityToFrequent()
+    {
+        _density = Density.FREQUENT;
     }
 
     public void PlayClip()
