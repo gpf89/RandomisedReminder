@@ -99,8 +99,7 @@ public class AudioHandler : MonoBehaviour
         _timeToNextClip -= Time.deltaTime;
         if (_timeToNextClip < 0)
         {
-            Debug.Log("Reset now");
-            Initialise();
+            PlayNextClip();
         }
         
         
@@ -114,6 +113,15 @@ public class AudioHandler : MonoBehaviour
     public void BeginCountdown()
     {
         _isCountingDown = true;
+    }
+
+    public void PlayNextClip()
+    {
+        var clipIndex = UnityEngine.Random.Range(0,_reminders.Count);
+        _audioSource.clip = _reminders[clipIndex];
+        _audioSource.Play();
+        Debug.Log($"Reset now, playing {_audioSource.clip.name}");
+        Initialise();
     }
 
     public void PlayClip()
