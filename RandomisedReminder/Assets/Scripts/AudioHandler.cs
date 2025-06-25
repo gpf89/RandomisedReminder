@@ -37,13 +37,9 @@ class AudioHandlerEditor : Editor
         {
             audioHandler.Initialise();
         }
-        if (GUILayout.Button("BeginCountdown"))
+        if (GUILayout.Button("Begin/EndCountdown"))
         {
-            audioHandler.BeginCountdown();
-        }
-        if (GUILayout.Button("EndCOuntdown"))
-        {
-            audioHandler.EndCountdown();
+            audioHandler.OnPlayClicked();
         }
         EditorGUILayout.TextField(audioHandler.FormattedTime(audioHandler.RemainingTime));
         //base.OnInspectorGUI();
@@ -58,14 +54,21 @@ public class AudioHandler : MonoBehaviour
     enum Density
     {
         SPARSE,
-        MEH,
+        MODERATE,
         FREQUENT
+    }
+
+    [Serializable]
+    struct ControlButton
+    {
+        public Button button;
+        public TMP_Text text;
     }
 
     [Header("User Controlls")]
     [Range(5,60)]
     [SerializeField] private int _duration = 5;
-    [SerializeField] private Density _density;
+    [SerializeField] private Density _density = Density.MODERATE;
     [Header("Clips")]
     [SerializeField] private AudioClip _startClip;
     [SerializeField] private List<AudioClip> _reminderClips;
@@ -74,11 +77,18 @@ public class AudioHandler : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _displayTime;
     [SerializeField] private Slider _durationSetter;
     [SerializeField] private List<GameObject> _disableables;
+    [SerializeField] private List<ControlButton> _frequencyButtons;
+    [SerializeField] private ControlButton _playButton;
     
     public float RemainingTime { get => _remainingTime;  }
     private float _remainingTime;
     private float _timeToNextClip;
     private bool _isCountingDown = false;
+
+    private Color _selectedButtonColor = Color.black;
+    private Color _deselectedButtonColor = Color.white;
+    private Color _selectedTextColor = Color.white;
+    private Color _deselectedTextColor = Color.black;
 
     private const float MINS_TO_SECS = 60f;
     private const float FRACTIONAL_VARIATION = 0.2f;
@@ -92,12 +102,13 @@ public class AudioHandler : MonoBehaviour
         Debug.Log(_duration);
         _remainingTime = _duration * MINS_TO_SECS;
         _displayTime.text = FormattedTime(_remainingTime);
+
+        ColorButtons();
     }
 
     public void Update()
     {
         if (_isCountingDown == false) return;
-        SetUIActive(false);
         if (_remainingTime > 0f)
         {
             _remainingTime -= Time.deltaTime;
@@ -128,35 +139,101 @@ public class AudioHandler : MonoBehaviour
     public void SetDensityToSparse()
     {
         _density = Density.SPARSE;
+        ColorButtons();
     }
 
-    public void SetDensityToMeh()
+    public void SetDensityToModerate()
     {
-        _density = Density.MEH;
+        _density = Density.MODERATE;
+        ColorButtons();
     }
 
     public void SetDensityToFrequent()
     {
         _density = Density.FREQUENT;
+        ColorButtons();
+    }
+
+    private void ColorButtons()
+    {
+        for (int i = 0; i < _frequencyButtons.Count; i++)
+        {
+            if (i == (int)_density)
+            {
+                SelectButton(_frequencyButtons[i]);
+            }
+            else
+            {
+                DeselectButton(_frequencyButtons[i]);
+            }
+        }
+    }
+
+    private void SelectButton(ControlButton cb)
+    {
+        var button = cb.button;
+        var text = cb.text;
+
+        var buttonColors = button.colors;
+        buttonColors.normalColor = _selectedButtonColor;
+        buttonColors.selectedColor = _selectedButtonColor;
+
+        button.colors = buttonColors;
+
+        text.color = _selectedTextColor;
+        
+        cb.button = button;
+        cb.text = text;
+    }
+
+    private void DeselectButton(ControlButton cb)
+    {
+        var button = cb.button;
+        var text = cb.text;
+
+        var buttonColors = button.colors;
+        buttonColors.normalColor = _deselectedButtonColor;
+        buttonColors.selectedColor = _deselectedButtonColor;
+
+        button.colors = buttonColors;
+
+        text.color = _deselectedTextColor;
+
+        cb.button = button;
+        cb.text = text;
     }
     #endregion
 
     #region PlayControls
-    public void BeginCountdown()
+    public void OnPlayClicked()
+    {
+        if(!_isCountingDown)
+        {
+            BeginCountdown();
+        }
+        else
+        {
+            EndCountdown();
+        }
+    }
+    private void BeginCountdown()
     {
         Initialise();
         _isCountingDown = true;
         _audioSource.clip = _startClip;
         _audioSource.Play();
+        SetUIActive(false);
+        SelectButton(_playButton);
     }
 
-    public void EndCountdown()
+    private void EndCountdown()
     {
         _isCountingDown = false;
         _audioSource.Stop();
         _remainingTime = _duration * MINS_TO_SECS;
         _displayTime.text = FormattedTime(_remainingTime);
         SetUIActive(true);
+        DeselectButton(_playButton);
     }
 
     private void SetUIActive(bool isActive)
@@ -186,7 +263,7 @@ public class AudioHandler : MonoBehaviour
             case Density.SPARSE:
                 baseInterval = 360f;
                 break;
-            case Density.MEH:
+            case Density.MODERATE:
                 baseInterval = 240f;
                 break;
             case Density.FREQUENT:
