@@ -1180,6 +1180,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: c57ce58db27bd2b49b546b171c37818b, type: 3}
   - {fileID: 8300000, guid: 485888e0c35cf3744a5a4396893cace6, type: 3}
   - {fileID: 8300000, guid: fefd3e54161e5c64aa3e04cc43d3ef84, type: 3}
+  _endClip: {fileID: 8300000, guid: d58f4f84798e4fb448562572f391aea8, type: 3}
   _audioSource: {fileID: 1775858317}
   _displayTime: {fileID: 1716619836}
   _durationSetter: {fileID: 1179822327}

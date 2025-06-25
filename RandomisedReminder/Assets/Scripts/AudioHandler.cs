@@ -72,6 +72,7 @@ public class AudioHandler : MonoBehaviour
     [Header("Clips")]
     [SerializeField] private AudioClip _startClip;
     [SerializeField] private List<AudioClip> _reminderClips;
+    [SerializeField] private AudioClip _endClip;
     [Header("Config")]
     [SerializeField] private AudioSource _audioSource;
     [SerializeField] private TextMeshProUGUI _displayTime;
@@ -124,6 +125,12 @@ public class AudioHandler : MonoBehaviour
         }
         else
         {
+            if (_audioSource.isPlaying)
+            {
+                _audioSource.Stop();
+            }
+            _audioSource.clip = _endClip;
+            _audioSource.Play();
             _isCountingDown = false;
             SetUIActive(true);
         }
