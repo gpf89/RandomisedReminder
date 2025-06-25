@@ -1197,6 +1197,9 @@ MonoBehaviour:
   _audioSource: {fileID: 1775858317}
   _displayTime: {fileID: 1716619836}
   _durationSetter: {fileID: 1179822327}
+  _disableables:
+  - {fileID: 1287364851}
+  - {fileID: 1179822325}
 --- !u!114 &1416909816
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -64,7 +64,7 @@ public class AudioHandler : MonoBehaviour
 
     [Header("User Controlls")]
     [Range(5,60)]
-    [SerializeField] private int _duration;
+    [SerializeField] private int _duration = 5;
     [SerializeField] private Density _density;
     [Header("Clips")]
     [SerializeField] private AudioClip _startClip;
@@ -73,6 +73,7 @@ public class AudioHandler : MonoBehaviour
     [SerializeField] private AudioSource _audioSource;
     [SerializeField] private TextMeshProUGUI _displayTime;
     [SerializeField] private Slider _durationSetter;
+    [SerializeField] private List<GameObject> _disableables;
     
     public float RemainingTime { get => _remainingTime;  }
     private float _remainingTime;
@@ -88,6 +89,7 @@ public class AudioHandler : MonoBehaviour
     public void Start()
     {
         _durationSetter.onValueChanged.AddListener(delegate { ValueChangeCheck(); });
+        Debug.Log(_duration);
         _remainingTime = _duration * MINS_TO_SECS;
         _displayTime.text = FormattedTime(_remainingTime);
     }
@@ -95,7 +97,7 @@ public class AudioHandler : MonoBehaviour
     public void Update()
     {
         if (_isCountingDown == false) return;
-        _durationSetter.gameObject.SetActive(false);
+        SetUIActive(false);
         if (_remainingTime > 0f)
         {
             _remainingTime -= Time.deltaTime;
@@ -110,7 +112,7 @@ public class AudioHandler : MonoBehaviour
         else
         {
             _isCountingDown = false;
-            _durationSetter.gameObject.SetActive(true);
+            SetUIActive(true);
         }
 
 
@@ -139,6 +141,41 @@ public class AudioHandler : MonoBehaviour
     }
     #endregion
 
+    #region PlayControls
+    public void BeginCountdown()
+    {
+        Initialise();
+        _isCountingDown = true;
+        _audioSource.clip = _startClip;
+        _audioSource.Play();
+    }
+
+    public void EndCountdown()
+    {
+        _isCountingDown = false;
+        _audioSource.Stop();
+        _remainingTime = _duration * MINS_TO_SECS;
+        _displayTime.text = FormattedTime(_remainingTime);
+        SetUIActive(true);
+    }
+
+    private void SetUIActive(bool isActive)
+    {
+        foreach (var gameObject in _disableables)
+        {
+            gameObject.SetActive(isActive);
+        }
+    }
+
+    private void PlayNextClip()
+    {
+        var clipIndex = UnityEngine.Random.Range(0,_reminderClips.Count);
+        _audioSource.clip = _reminderClips[clipIndex];
+        _audioSource.Play();
+        Debug.Log($"Playing clip {_audioSource.clip.name}");
+    }
+    #endregion
+    
     public void Initialise()
     {
         _remainingTime = _duration * MINS_TO_SECS;
@@ -172,30 +209,6 @@ public class AudioHandler : MonoBehaviour
         Debug.Log($"Countdown timer set to " + _displayTime.text);
     }
 
-    public void BeginCountdown()
-    {
-        Initialise();
-        _isCountingDown = true;
-        _audioSource.clip = _startClip;
-        _audioSource.Play();
-    }
-
-    public void EndCountdown()
-    {
-        _isCountingDown = false;
-        _audioSource.Stop();
-        Initialise();
-        _displayTime.text = FormattedTime(_remainingTime);
-        _durationSetter.gameObject.SetActive(true);
-    }
-
-    private void PlayNextClip()
-    {
-        var clipIndex = UnityEngine.Random.Range(0,_reminderClips.Count);
-        _audioSource.clip = _reminderClips[clipIndex];
-        _audioSource.Play();
-        Debug.Log($"Playing clip {_audioSource.clip.name}");
-    }
 
     #region DebugButtons
     public void PlayClip()
