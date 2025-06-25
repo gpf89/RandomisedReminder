@@ -82,6 +82,7 @@ public class AudioHandler : MonoBehaviour
     
     public float RemainingTime { get => _remainingTime;  }
     private float _remainingTime;
+    private float _baseInterval = 0f;
     private float _timeToNextClip;
     private bool _isCountingDown = false;
 
@@ -99,6 +100,7 @@ public class AudioHandler : MonoBehaviour
     public void Start()
     {
         _durationSetter.onValueChanged.AddListener(delegate { ValueChangeCheck(); });
+        Debug.Log(_durationSetter.value);
         Debug.Log(_duration);
         _remainingTime = _duration * MINS_TO_SECS;
         _displayTime.text = FormattedTime(_remainingTime);
@@ -131,7 +133,6 @@ public class AudioHandler : MonoBehaviour
         if (_timeToNextClip < 0)
         {
             PlayNextClip();
-            Initialise();
         }
     }
 
@@ -219,11 +220,14 @@ public class AudioHandler : MonoBehaviour
     private void BeginCountdown()
     {
         Initialise();
+        ResetClipTimer();
+        
+        SetUIActive(false);
+        SelectButton(_playButton);
+
         _isCountingDown = true;
         _audioSource.clip = _startClip;
         _audioSource.Play();
-        SetUIActive(false);
-        SelectButton(_playButton);
     }
 
     private void EndCountdown()
@@ -250,6 +254,14 @@ public class AudioHandler : MonoBehaviour
         _audioSource.clip = _reminderClips[clipIndex];
         _audioSource.Play();
         Debug.Log($"Playing clip {_audioSource.clip.name}");
+        ResetClipTimer();
+    }
+
+    private void ResetClipTimer()
+    {
+        float intervalDeviation = UnityEngine.Random.Range(-0.5f * _baseInterval * FRACTIONAL_VARIATION, 0.5f * _baseInterval * FRACTIONAL_VARIATION);
+        _timeToNextClip = _baseInterval + intervalDeviation;
+        Debug.Log($"Clip timer reset, time to next clip: {FormattedTime(_timeToNextClip)}, intervalDeviation: {intervalDeviation}");
     }
     #endregion
     
@@ -257,25 +269,20 @@ public class AudioHandler : MonoBehaviour
     {
         _remainingTime = _duration * MINS_TO_SECS;
 
-        float baseInterval = 0f;
         switch(_density)
         {
             case Density.SPARSE:
-                baseInterval = 360f;
+                _baseInterval = 360f;
                 break;
             case Density.MODERATE:
-                baseInterval = 240f;
+                _baseInterval = 240f;
                 break;
             case Density.FREQUENT:
-                baseInterval = 120f;
+                _baseInterval = 120f;
                 break;
         }
-        if (baseInterval == 0f)
+        if (_baseInterval == 0f)
             throw new ArgumentOutOfRangeException("interval between clips is 0 seconds");
-
-        float intervalDeviation = UnityEngine.Random.Range(-0.5f * baseInterval * FRACTIONAL_VARIATION, 0.5f * baseInterval * FRACTIONAL_VARIATION);
-        _timeToNextClip = baseInterval + intervalDeviation;
-        Debug.Log($"Clip timer reset, time to next clip: {FormattedTime(_timeToNextClip)}, intervalDeviation: {intervalDeviation}");
     }
 
     private void ValueChangeCheck()
