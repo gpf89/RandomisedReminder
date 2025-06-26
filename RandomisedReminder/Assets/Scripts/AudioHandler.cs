@@ -100,6 +100,7 @@ public class AudioHandler : MonoBehaviour
 
     public void Start()
     {
+        Screen.sleepTimeout = SleepTimeout.NeverSleep;
         _durationSetter.onValueChanged.AddListener(delegate { ValueChangeCheck(); });
         Debug.Log(_durationSetter.value);
         Debug.Log(_duration);
@@ -133,6 +134,7 @@ public class AudioHandler : MonoBehaviour
             _audioSource.Play();
             _isCountingDown = false;
             SetUIActive(true);
+            Screen.sleepTimeout = SleepTimeout.SystemSetting;
         }
 
 
