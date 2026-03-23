@@ -76,6 +76,8 @@ public class AudioHandler : MonoBehaviour
     [Header("Config")]
     [SerializeField] private AudioSource _audioSource;
     [SerializeField] private TextMeshProUGUI _displayTime;
+    [SerializeField] private TMP_Text _minutes;
+    [SerializeField] private TMP_Text _seconds;
     [SerializeField] private Slider _durationSetter;
     [SerializeField] private List<GameObject> _disableables;
     [SerializeField] private List<ControlButton> _frequencyButtons;
@@ -106,6 +108,7 @@ public class AudioHandler : MonoBehaviour
         Debug.Log(_duration);
         _remainingTime = _duration * MINS_TO_SECS;
         _displayTime.text = FormattedTime(_remainingTime);
+        SetDisplayTime(_remainingTime);
 
         ColorButtons();
     }
@@ -117,6 +120,7 @@ public class AudioHandler : MonoBehaviour
         {
             _remainingTime -= Time.deltaTime;
             _displayTime.text = FormattedTime(_remainingTime);
+            SetDisplayTime(_remainingTime);
             // dirty hack for now
             // before _remainingTime = 0f in the else block it displays -01:-01 
             if (_remainingTime < 0.1)
@@ -245,6 +249,7 @@ public class AudioHandler : MonoBehaviour
         _audioSource.Stop();
         _remainingTime = _duration * MINS_TO_SECS;
         _displayTime.text = FormattedTime(_remainingTime);
+        SetDisplayTime(_remainingTime);
         SetUIActive(true);
         DeselectButton(_playButton);
     }
@@ -299,6 +304,7 @@ public class AudioHandler : MonoBehaviour
         _duration = (int)_durationSetter.value + 5;
         _remainingTime = _duration * MINS_TO_SECS;
         _displayTime.text = FormattedTime(_remainingTime);
+        SetDisplayTime(_remainingTime);
         Debug.Log($"Countdown timer set to " + _displayTime.text);
     }
 
@@ -325,11 +331,28 @@ public class AudioHandler : MonoBehaviour
     }
     #endregion
 
+    private void SetDisplayTime(float time)
+    {
+        _minutes.text = GetMinutes(time);
+        _seconds.text = GetSeconds(time);
+    }
+
     public string FormattedTime(float time)
     {
-        int minutes = Mathf.FloorToInt(time / 60);
-        int seconds = Mathf.FloorToInt((time % 60));
+        return GetMinutes(time) + " : " + GetSeconds(time);
+    }
 
-        return minutes.ToString("00") + " : " + seconds.ToString("00");
+    private string GetMinutes(float time)
+    {
+        int minutes = Mathf.FloorToInt(time / 60);
+
+        return minutes.ToString("00");
+    }
+
+    private string GetSeconds(float time)
+    {
+        int seconds = Mathf.FloorToInt(time % 60);
+
+        return seconds.ToString("00");
     }
 }
