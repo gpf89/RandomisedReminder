@@ -75,8 +75,12 @@ public class AudioHandler : MonoBehaviour
     [SerializeField] private AudioClip _endClip;
     [Header("Config")]
     [SerializeField] private AudioSource _audioSource;
-    [SerializeField] private TextMeshProUGUI _displayTime;
+    [SerializeField] private TMP_Text _minutes;
+    [SerializeField] private TMP_Text _seconds;
+    [SerializeField] private TMP_Text _elipses;
+    [SerializeField] private float _throbberPeriod =  3f;
     [SerializeField] private Slider _durationSetter;
+    [SerializeField] private GameObject _throbber;
     [SerializeField] private List<GameObject> _disableables;
     [SerializeField] private List<ControlButton> _frequencyButtons;
     [SerializeField] private ControlButton _playButton;
@@ -105,7 +109,7 @@ public class AudioHandler : MonoBehaviour
         Debug.Log(_durationSetter.value);
         Debug.Log(_duration);
         _remainingTime = _duration * MINS_TO_SECS;
-        _displayTime.text = FormattedTime(_remainingTime);
+        SetDisplayTime(_remainingTime);
 
         ColorButtons();
     }
@@ -116,7 +120,7 @@ public class AudioHandler : MonoBehaviour
         if (_remainingTime > 0f)
         {
             _remainingTime -= Time.deltaTime;
-            _displayTime.text = FormattedTime(_remainingTime);
+            SetDisplayTime(_remainingTime);
             // dirty hack for now
             // before _remainingTime = 0f in the else block it displays -01:-01 
             if (_remainingTime < 0.1)
@@ -244,7 +248,7 @@ public class AudioHandler : MonoBehaviour
         _isCountingDown = false;
         _audioSource.Stop();
         _remainingTime = _duration * MINS_TO_SECS;
-        _displayTime.text = FormattedTime(_remainingTime);
+        SetDisplayTime(_remainingTime);
         SetUIActive(true);
         DeselectButton(_playButton);
     }
@@ -255,6 +259,8 @@ public class AudioHandler : MonoBehaviour
         {
             gameObject.SetActive(isActive);
         }
+
+        _throbber.SetActive(!isActive);
     }
 
     private void PlayNextClip()
@@ -298,8 +304,8 @@ public class AudioHandler : MonoBehaviour
     {
         _duration = (int)_durationSetter.value + 5;
         _remainingTime = _duration * MINS_TO_SECS;
-        _displayTime.text = FormattedTime(_remainingTime);
-        Debug.Log($"Countdown timer set to " + _displayTime.text);
+        SetDisplayTime(_remainingTime);
+        Debug.Log($"Countdown timer set to " + FormattedTime(_remainingTime));
     }
 
 
@@ -325,11 +331,49 @@ public class AudioHandler : MonoBehaviour
     }
     #endregion
 
+    private void SetDisplayTime(float time)
+    {
+        _minutes.text = GetMinutes(time);
+        _seconds.text = GetSeconds(time);
+
+        float duration = _throbberPeriod;
+        float phase = duration - time % duration;
+        float normalisedPhase = phase / duration;
+
+        float quadrant = 0.25f;
+        string elipses = "";
+        if (normalisedPhase > quadrant)
+        {
+            elipses += ".";
+            if (normalisedPhase > 2 * quadrant)
+            {
+                elipses += ".";
+                if (normalisedPhase > 3 * quadrant)
+                {
+                    elipses += ".";
+                }
+            }
+        }
+
+        _elipses.text = elipses;
+    }
+
     public string FormattedTime(float time)
     {
-        int minutes = Mathf.FloorToInt(time / 60);
-        int seconds = Mathf.FloorToInt((time % 60));
+        return GetMinutes(time) + " : " + GetSeconds(time);
+    }
 
-        return minutes.ToString("00") + " : " + seconds.ToString("00");
+    private string GetMinutes(float time)
+    {
+        int minutes = Mathf.FloorToInt(time / 60);
+
+        return minutes.ToString("00");
+    }
+
+    private string GetSeconds(float time)
+    {
+        int seconds = Mathf.FloorToInt(time % 60);
+
+        return seconds.ToString("00");
     }
 }
